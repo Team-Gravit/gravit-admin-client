@@ -3,11 +3,7 @@ import { Button } from '@/shared/components/ui/button';
 import { cn } from '@/shared/lib/cn';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 
-/**
- * 화면 전체를 막는 장애 표시 (RAVVIT_SPEC §A-4).
- * 진입을 차단하지 않고 화면 안에서 사유를 확인할 수 있게 한다.
- * `forbidden` 은 재시도해도 결과가 같아 [다시 확인] 을 두지 않는다.
- */
+/** 403은 재시도로 해결되지 않아 다시 확인 행동을 제공하지 않습니다. */
 const BANNERS: Record<
   Exclude<ServiceStatus, 'ok' | 'checking'>,
   { message: string; tone: 'warning' | 'danger'; recheckable: boolean }

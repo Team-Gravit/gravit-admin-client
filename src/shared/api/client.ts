@@ -38,14 +38,9 @@ function forceLogout(): void {
   window.location.href = ROUTES.LOGIN;
 }
 
-/**
- * 401 재발급 **단일 절차** (04 §6-4, decisions D8-3).
- * axios 인터셉터와 Ravvit fetch 클라이언트가 이 함수를 **공유**한다 — 각자 재발급하면
- * refresh Rotation 때문에 서로가 방금 받은 토큰을 무효화한다. 복제 금지.
- * 반환: 새 accessToken. 복원 실패는 호출부에서 로그인으로 이동하도록 null을 반환한다.
- */
+/** refresh Rotation 경쟁을 막기 위해 axios·Ravvit·QA가 단일 재발급 절차를 공유합니다(D8-3). */
 export async function refreshAccessToken(): Promise<string | null> {
-  // 이미 다른 요청이 재발급 중이면 그 결과를 기다린다(단일 비행).
+
   if (reissueQueue.isReissuing) {
     return reissueQueue.subscribe();
   }
@@ -66,7 +61,6 @@ export async function refreshAccessToken(): Promise<string | null> {
   }
 }
 
-/** 보호 API의 401 처리. 부팅 시 복원과 같은 재발급 큐를 사용한다. */
 export async function reissueAccessToken(): Promise<string | null> {
   const accessToken = await refreshAccessToken();
   if (!accessToken) forceLogout();

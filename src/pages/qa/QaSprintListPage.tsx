@@ -13,7 +13,6 @@ import { QA_MANUAL_URL } from '@/features/qa/constants';
 import { qaErrorView } from '@/features/qa/errorView';
 import type { Sprint, SprintSummary } from '@/features/qa/schemas';
 
-/** W1: exactly three columns; one list request, no status filter or per-row requests. */
 export function QaSprintListPage() {
   const navigate = useNavigate();
   const { search } = useLocation();

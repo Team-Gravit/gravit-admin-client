@@ -3,11 +3,6 @@ import { Send, Square } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import { cn } from '@/shared/lib/cn';
 
-/**
- * 입력 영역 (RAVVIT_SPEC §A-3·§B-4).
- * 자동 확장 멀티라인 · Enter 전송 / Shift+Enter 줄바꿈.
- * 응답 대기 중에는 전송 버튼이 중단 버튼으로 바뀐다(Primary 배경 아님 — 주 액션이 아니다).
- */
 interface ChatComposerProps {
   value: string;
   /** 장애 배너 노출 등으로 입력 자체가 막힌 상태 */
@@ -55,7 +50,7 @@ export function ChatComposer({
   return (
     <div
       className={cn(
-        // rounded-xl = 입력 박스 라운드. 조절하려면 이 클래스를 바꾼다(md → lg → xl → 2xl → full).
+
         'mt-4 flex items-end gap-2 rounded-xl border border-border p-1.5',
         disabled ? 'bg-hover' : 'bg-surface',
       )}

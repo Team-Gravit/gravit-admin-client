@@ -16,11 +16,6 @@ const BOTTOM_THRESHOLD = 24;
 /** 읽기 컬럼 폭. 스크롤 컨테이너는 이보다 넓어 **스크롤바가 본문을 침범하지 않는다**. */
 const COLUMN = 'mx-auto w-full max-w-3xl';
 
-/**
- * Ravvit 대화 화면 (RAVVIT_SPEC §B-1).
- * 뷰포트를 채우고 **메시지 영역만** 스크롤한다. 입력창은 항상 하단 고정.
- * 대화 상태는 스토어 소유 — 이 컴포넌트가 언마운트돼도 진행 중 응답이 끊기지 않는다.
- */
 export function RavvitConversation({ nickname }: { nickname: string | null }) {
   const messages = useRavvitStore((s) => s.messages);
   const service = useRavvitStore((s) => s.service);
@@ -55,7 +50,6 @@ export function RavvitConversation({ nickname }: { nickname: string | null }) {
     if (stickToBottom) scrollToBottom();
   }, [messages, stickToBottom, scrollToBottom]);
 
-  /** 답변 표시 완료 때 기존 하단 추종 조건을 유지한다. */
   const handleReveal = useCallback(() => {
     if (stickRef.current) scrollToBottom();
   }, [scrollToBottom]);
@@ -110,7 +104,7 @@ export function RavvitConversation({ nickname }: { nickname: string | null }) {
               messages.map((message, index) => (
                 <div
                   key={message.id}
-                  // 턴과 턴 사이(봇 → 다음 유저)를 한 턴 안(유저 → 봇)보다 넓게 둔다 (§B-2)
+
                   className={cn(index > 0 && (message.role === 'user' ? 'mt-8' : 'mt-3'))}
                 >
                   {message.role === 'user' ? (

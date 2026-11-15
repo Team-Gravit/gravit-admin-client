@@ -1,11 +1,7 @@
 import { useState } from 'react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 
-/**
- * 도구 호출 로그 (RAVVIT_SPEC §B-3).
- * 대기 중에는 펼쳐 유일한 진행 신호로 쓰고, 종료 이벤트 수신 시 자동으로 접는다.
- * `message` 는 원문 그대로 노출한다 — 한국어 매핑은 도구가 늘 때마다 규칙 관리 비용이 든다.
- */
+/** 도구가 늘 때마다 번역 규칙이 필요하지 않도록 로그 message 원문을 표시합니다. */
 interface ToolLogBlockProps {
   logs: string[];
   pending: boolean;
@@ -14,7 +10,7 @@ interface ToolLogBlockProps {
 export function ToolLogBlock({ logs, pending }: ToolLogBlockProps) {
   const [manualOpen, setManualOpen] = useState<boolean | null>(null);
 
-  if (logs.length === 0) return null; // 도구 호출 0회면 블록 자체를 렌더하지 않는다
+  if (logs.length === 0) return null;
 
   const open = manualOpen ?? pending; // 사용자가 한 번이라도 토글하면 그 선택이 이긴다
   const Icon = open ? ChevronDown : ChevronRight;

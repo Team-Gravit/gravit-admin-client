@@ -1,9 +1,4 @@
-/**
- * 401 reissue 단일 비행 큐 (04 §6-4).
- * reissue(=POST /api/v1/auth/reissue) 가 진행 중일 때 도착하는 다른 401 요청은 여기서 대기하다가,
- * 재발급 완료 시 새 accessToken(또는 실패 시 null)을 일괄 전달받는다.
- * (axios 호출은 client.ts 가 소유 — 순환 의존 회피용 순수 큐.)
- */
+/** axios 호출을 client.ts에 남겨 순환 의존 없이 재발급 대기 요청에 같은 결과를 전달합니다. */
 type Waiter = (token: string | null) => void;
 
 let isReissuing = false;

@@ -1,7 +1,3 @@
-/**
- * 라우트 경로 상수 (04 §8-1).
- * 모든 라우팅·링크는 이 상수를 참조한다. 하드코딩된 경로 문자열 금지.
- */
 export const ROUTES = {
   LOGIN: '/login',
   OAUTH_CALLBACK_PATTERN: '/login/oauth2/code/:provider',
@@ -24,7 +20,7 @@ export const ROUTES = {
   NOTICES: '/notices',
   NOTICE_NEW: '/notices/new',
   NOTICE_DETAIL: (noticeId: number | string) => `/notices/${noticeId}`,
-  // QA (decisions D9-1)
+
   QA_SPRINTS: '/qa/sprints',
   QA_SPRINT: (sprintId: number | string) => `/qa/sprints/${sprintId}`,
   QA_SPRINT_SETUP: (sprintId: number | string) => `/qa/sprints/${sprintId}/setup`,

@@ -1,7 +1,3 @@
-/**
- * 유저 메시지 (RAVVIT_SPEC §B-2). 우측 정렬 + 배경 채운 말풍선.
- * 발신자 라벨·아바타는 두지 않는다 — 정렬과 배경만으로 구분한다.
- */
 export function UserMessageItem({ content }: { content: string }) {
   return (
     <div className="flex justify-end">

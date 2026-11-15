@@ -2,11 +2,6 @@ import * as React from 'react';
 import * as RechartsPrimitive from 'recharts';
 import { cn } from '@/shared/lib/cn';
 
-/**
- * shadcn/ui Chart (recharts 래퍼) — 라이트 전용 트림.
- * 원본의 THEMES 다크 셀렉터·Legend 를 제거한 버전(DS 라이트 모드 전용, 단일 시리즈 차트만 사용).
- * config 의 color 는 `hsl(var(--chart-*))` 토큰 문자열만 받는다(raw hex 금지).
- */
 export type ChartConfig = Record<
   string,
   {

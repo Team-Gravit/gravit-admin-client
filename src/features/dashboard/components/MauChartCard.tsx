@@ -16,7 +16,6 @@ const chartConfig = {
   mau: { label: 'MAU', color: 'hsl(var(--chart-mau))' },
 } satisfies ChartConfig;
 
-// "2026-08" → "26.08"
 const formatMonth = (month: string) => month.slice(2).replace('-', '.');
 
 export function MauChartCard() {

@@ -14,13 +14,6 @@ import {
 import { cn } from '@/shared/lib/cn';
 import { ROUTES } from '@/shared/constants/routes';
 
-/**
- * Sidebar (DS-00 §7, DS-01 §7, 04 §10-6). 240px, 우측 1px border.
- * 메뉴 구성은 피그마(node 8720:4149) 따름: 대시보드 → [서비스 관리] 컨텐츠 관리·스테이징
- *   → [운영] 유저 관리·신고 관리·공지 관리. 섹션 헤더는 텍스트(아이콘 없음).
- * 활성 = 행 전체폭 bg-primary-subtle + 우측 2px primary(피그마 우측 강조선을 DS primary 토큰으로 매핑).
- * presentational — 운영자 정보는 prop 으로 주입(shared→features 금지). 메뉴는 ROUTES 참조.
- */
 interface OperatorInfo {
   nickname: string;
   email: string;
@@ -86,7 +79,7 @@ const NAV_SECTIONS: NavSection[] = [
         icon: Calendar,
         isActive: (p) => p.startsWith('/notices'),
       },
-      // QA 는 운영 섹션 맨 아래 (decisions D9-1)
+
       {
         label: 'QA',
         to: ROUTES.QA_SPRINTS,

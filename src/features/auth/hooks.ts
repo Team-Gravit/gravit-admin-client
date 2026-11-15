@@ -19,11 +19,7 @@ export function useStartOAuth() {
   });
 }
 
-/**
- * OAuth 콜백 처리. authCode → 토큰 + role.
- * role 게이트: ADMIN 만 토큰 저장 후 진입, 그 외(USER)는 토큰 폐기 + 권한없음으로 복귀.
- * (보안은 매 요청 /admin/** 403 이 보장 — 여기 차단은 UX.)
- */
+/** ADMIN 게이트는 UX용이며 실제 권한은 서버의 /admin/** 403으로 검증합니다. */
 export function useOAuthCallback() {
   const navigate = useNavigate();
   return useMutation({

@@ -19,7 +19,6 @@ export const inquiryListItemSchema = z.object({
   createdAt: z.string(),
 });
 
-/** ⚠️ 페이지네이션 래퍼: hasNext / contents / 1-base page (백오피스 공통, inquiry-handoff A-0). */
 export const inquiryListResponseSchema = z.object({
   page: z.number(),
   totalPages: z.number(),

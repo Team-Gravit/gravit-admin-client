@@ -2,14 +2,8 @@ import { create } from 'zustand';
 import { RavvitHttpError, checkHealth, sendChat } from '@/features/ravvit/api';
 import type { BotMessage, ChatHistory, ChatMessage, ServiceStatus } from '@/features/ravvit/types';
 
-/**
- * Ravvit 대화 상태 (RAVVIT_SPEC §A-5, decisions D8-5).
- * **라우트 컴포넌트 밖의 전역 스토어**여야 한다 — 메뉴를 옮겼다 돌아와도 대화가 유지되고,
- * 응답 대기 중 언마운트로 SSE 가 끊기지 않아야 하기 때문이다.
- * 브라우저 저장소는 쓰지 않는다(새로고침 = 초기화). 사내 문서 내용을 localStorage 에 남기지 않는다.
- */
+/** 라우트 이탈 시 SSE를 유지하도록 전역 스토어에 두며, 사내 대화는 브라우저 저장소에 남기지 않습니다(D8-5). */
 
-/** SSE error 의 message 를 얻지 못한 실패에 쓰는 기본 문구 (§A-2 Error). */
 export const DEFAULT_ERROR_MESSAGE = '응답을 받지 못했어요. 잠시 후 다시 시도해 주세요.';
 
 let seq = 0;
@@ -28,7 +22,7 @@ function patchBot(
 
 interface RavvitState {
   messages: ChatMessage[];
-  /** 서버가 준 불투명 값. 읽거나 가공하지 않고 다음 요청에 그대로 회신만 한다 (D8-2). */
+
   history: ChatHistory;
   /** 직전 턴을 보낼 때 사용한 history 스냅샷. 재생성이 이 값으로 되돌린다. */
   pendingHistory: ChatHistory;
@@ -42,7 +36,7 @@ interface RavvitState {
   setDraft: (value: string) => void;
   checkService: () => Promise<void>;
   send: (question: string) => Promise<void>;
-  /** 직전 답변을 걷어내고 같은 질문을 다시 보낸다. 실패 재시도·정상 답변 재생성 공용. */
+
   regenerate: () => Promise<void>;
   markRevealed: (id: string) => void;
   abort: () => void;
@@ -50,7 +44,7 @@ interface RavvitState {
 }
 
 export const useRavvitStore = create<RavvitState>((set, get) => {
-  /** 봇 메시지 1개를 추가하고 스트림을 끝까지 소비한다. 유저 메시지는 호출부가 책임진다. */
+
   async function runTurn(question: string): Promise<void> {
     const botId = nextId();
     // 실패한 시도는 history 를 갱신하지 않으므로, 재시도해도 대화 맥락이 어긋나지 않는다 (§A-2).
@@ -113,7 +107,7 @@ export const useRavvitStore = create<RavvitState>((set, get) => {
       );
     } catch (error) {
       if (signal.aborted) {
-        // 중단: 누적된 도구 로그는 남기고 접는다. 답변은 표시하지 않는다 (§A-3).
+
         set((s) => ({
           messages: patchBot(s.messages, botId, (b) => ({ ...b, status: 'aborted' })),
         }));
@@ -166,7 +160,6 @@ export const useRavvitStore = create<RavvitState>((set, get) => {
       await runTurn(trimmed);
     },
 
-    // 마지막 봇 메시지만 걷어내고 같은 질문을 다시 보낸다(유저 메시지는 남긴다).
     // history 를 턴 이전 스냅샷으로 되돌리는 것이 핵심 — 현재 history 로 보내면
     // 방금 받은 답변이 맥락에 섞여 '재생성'이 아니라 '이어서 답하기'가 된다.
     regenerate: async () => {

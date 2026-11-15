@@ -28,7 +28,7 @@ interface DataTableProps<T> {
   isLoading?: boolean;
   isError?: boolean;
   onRetry?: () => void;
-  /** 오류 상태 문구. 생략하면 ErrorState 기본 문구. */
+
   errorMessage?: string;
   emptyMessage?: string;
   emptyIcon?: LucideIcon;

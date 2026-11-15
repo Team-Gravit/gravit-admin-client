@@ -10,11 +10,7 @@ import {
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 
-/**
- * Strict Match Modal (DS-01 §5-6, 폭 480px). 스테이징 promote 전용.
- * 라벨명을 정확히(대소문자·공백 포함) 입력해야 [반영] 활성 (01 §6-7-8, decisions).
- * ⚠️ promote 는 비가역 — 실제 실행은 사람. 이 컴포넌트는 입력 일치 게이트 + onConfirm 호출만.
- */
+/** 비가역 promote의 확인 게이트입니다. 라벨의 대소문자·공백까지 그대로 비교합니다. 실제 실행은 사람에게 맡깁니다. */
 interface StrictMatchModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;

@@ -7,11 +7,6 @@ import { ToolLogBlock } from '@/features/ravvit/components/ToolLogBlock';
 import { DEFAULT_ERROR_MESSAGE } from '@/features/ravvit/store';
 import type { BotMessage } from '@/features/ravvit/types';
 
-/**
- * 봇 답변 (RAVVIT_SPEC §A-2·§B-2).
- * 컬럼 전체 폭 좌측 정렬, **배경·보더 없음** — 마크다운 내부 블록(코드·표)의 자체 배경과 충돌하기 때문.
- * 복사·다시 생성은 **답변 하단 액션 행**에 둔다(본문 위에 겹치지 않게 — 사용자 결정 2026-09-09).
- */
 interface BotMessageItemProps {
   message: BotMessage;
   /** 마지막 메시지만 재생성할 수 있다 — 중간 턴을 되돌리면 이후 대화 맥락이 어긋난다. */

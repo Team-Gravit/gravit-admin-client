@@ -1,8 +1,4 @@
-/**
- * accessToken은 메모리, refreshToken은 서버의 HttpOnly 쿠키에 둔다.
- * localStorage에는 세션 복원을 시도할지 알려주는 힌트만 저장한다.
- * 힌트는 인증 증거가 아니며, 새로고침 시 쿠키 재발급 결과로 세션을 판정한다.
- */
+/** 토큰은 메모리·HttpOnly 쿠키에 두며, localStorage 힌트는 인증 증거가 아닙니다. 세션은 쿠키 재발급 결과로 판정합니다. */
 const SESSION_HINT_KEY = 'gravit_admin_session';
 const LEGACY_REFRESH_TOKEN_KEY = 'gravit_admin_refresh_token';
 

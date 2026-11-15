@@ -1,8 +1,4 @@
-/**
- * Empty 상태 (RAVVIT_SPEC §A-2).
- * 안내 문구는 진입마다 1개를 무작위 추출하되(시드는 스토어가 보관 — 리렌더로 바뀌지 않는다),
- * 추천 질문 칩은 **고정**이다. 칩까지 바뀌면 재진입 시 이전에 본 질문을 찾지 못한다.
- */
+/** 안내 시드는 재렌더에도 유지하고 추천 질문은 고정해 재진입 시 같은 질문을 찾게 합니다. */
 const GREETINGS = ['Ravvit에게 물어보세요.', '무엇을 도와드릴까요?', '어떤 게 궁금하신가요?'];
 
 const SUGGESTIONS = [
@@ -19,7 +15,7 @@ interface EmptyPromptProps {
 }
 
 export function EmptyPrompt({ nickname, seed, disabled, onPick }: EmptyPromptProps) {
-  // 닉네임을 얻지 못하면 4번 문구를 후보에서 제외한다
+
   const candidates = nickname ? [...GREETINGS, `${nickname}님, 안녕하세요.`] : GREETINGS;
   const greeting = candidates[seed % candidates.length];
 

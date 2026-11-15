@@ -9,14 +9,9 @@ import {
 } from '@/features/ravvit/schemas';
 import type { ChatHistory, ChatUsage } from '@/features/ravvit/types';
 
-/**
- * Ravvit(챗봇) API 클라이언트 (decisions D8-2·D8-5).
- * **axios(apiClient)를 쓰지 않는다** — 브라우저 axios 는 응답 스트리밍을 지원하지 않아
- * SSE 를 읽을 수 없다. fetch + ReadableStream 이 유일한 선택지다.
- */
+/** 브라우저 axios는 응답 스트리밍을 지원하지 않아 SSE를 fetch로 읽습니다(D8-2·D8-5). */
 const BASE = env.VITE_RAVVIT_API_BASE;
 
-/** 상태코드를 화면 분기(403/503)까지 전달하기 위한 에러 (D8-3 매핑표). */
 export class RavvitHttpError extends Error {
   constructor(readonly status: number) {
     super(`RAVVIT_HTTP_${status}`);
@@ -24,7 +19,6 @@ export class RavvitHttpError extends Error {
   }
 }
 
-/** 진입 시 1회. 값은 화면에 노출하지 않고 성공 판정에만 쓴다 (§A-4). */
 export async function checkHealth(): Promise<void> {
   const res = await fetch(`${BASE}/health`);
   if (!res.ok) throw new RavvitHttpError(res.status);
@@ -54,11 +48,7 @@ function postChat(
   });
 }
 
-/**
- * 질문 1턴. 종료 이벤트(answer/error)까지 스트림을 읽고 반환한다.
- * 401 은 **공유 재발급 절차**(client.ts)로 갱신 후 1회만 재시도한다 — 여기서 재발급을
- * 직접 구현하면 axios 인터셉터와 경쟁해 refresh Rotation 이 서로를 무효화한다 (D8-3).
- */
+/** refresh Rotation 경쟁을 막기 위해 401 재발급을 공통 절차와 공유합니다(D8-3). */
 export async function sendChat(
   question: string,
   history: ChatHistory,

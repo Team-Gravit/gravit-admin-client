@@ -4,9 +4,6 @@ import { Button } from '@/shared/components/ui/button';
 import { LogOut } from 'lucide-react';
 import { useState } from 'react';
 
-/**
- * presentational — 로그아웃 동작은 prop 으로 주입(shared→features 금지).
- */
 interface HeaderProps {
   onLogout: () => void;
 }

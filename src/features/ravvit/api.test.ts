@@ -11,7 +11,7 @@ function sse(raw: string) {
   const bytes = new TextEncoder().encode(raw);
   return new Response(new ReadableStream<Uint8Array>({
     start(controller) {
-      // 이벤트와 UTF-8 문자 경계를 가로질러도 원문을 복원해야 해요.
+
       for (let index = 0; index < bytes.length; index += 7) controller.enqueue(bytes.slice(index, index + 7));
       controller.close();
     },

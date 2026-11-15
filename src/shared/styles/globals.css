@@ -1,57 +1,55 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* DS-STYLE-01 / D15 — 실험 브랜치의 값. 기존 의미 변수 이름을 유지해요. */
 @layer base {
   :root {
-    --background: 0 0% 100%; /* #FFFFFF */
-    --foreground: 214.736842 22.891566% 16.27451%; /* #202833 */
-    --card: 0 0% 100%; /* #FFFFFF */
-    --card-foreground: 214.736842 22.891566% 16.27451%; /* #202833 */
-    --popover: 0 0% 100%; /* #FFFFFF */
-    --popover-foreground: 214.736842 22.891566% 16.27451%; /* #202833 */
-    --primary: 218.928571 70% 47.058824%; /* #245FCC */
-    --primary-foreground: 0 0% 100%; /* #FFFFFF */
-    --primary-hover: 219.020979 72.588832% 38.627451%; /* #1B4DAA */
-    --secondary: 210 22.222222% 96.470588%; /* #F4F6F8 */
-    --secondary-foreground: 214.736842 22.891566% 16.27451%; /* #202833 */
-    --muted: 210 22.222222% 96.470588%; /* #F4F6F8 */
-    --muted-foreground: 214 14.423077% 40.784314%; /* #596677 */
-    --accent: 210 22.222222% 96.470588%; /* #F4F6F8 */
-    --accent-foreground: 214.736842 22.891566% 16.27451%; /* #202833 */
-    --destructive: 353 53.097345% 44.313725%; /* #AD3543 */
-    --destructive-foreground: 0 0% 100%; /* #FFFFFF */
-    --border: 210 22.222222% 96.470588%; /* #F4F6F8 */
-    --input: 213.103448 12.446352% 54.313725%; /* #7C8999 */
-    --ring: 218.928571 70% 47.058824%; /* #245FCC */
-    --surface: 0 0% 100%; /* #FFFFFF */
+    --background: 0 0% 100%;
+    --foreground: 214.736842 22.891566% 16.27451%;
+    --card: 0 0% 100%;
+    --card-foreground: 214.736842 22.891566% 16.27451%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 214.736842 22.891566% 16.27451%;
+    --primary: 218.928571 70% 47.058824%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 219.020979 72.588832% 38.627451%;
+    --secondary: 210 22.222222% 96.470588%;
+    --secondary-foreground: 214.736842 22.891566% 16.27451%;
+    --muted: 210 22.222222% 96.470588%;
+    --muted-foreground: 214 14.423077% 40.784314%;
+    --accent: 210 22.222222% 96.470588%;
+    --accent-foreground: 214.736842 22.891566% 16.27451%;
+    --destructive: 353 53.097345% 44.313725%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 210 22.222222% 96.470588%;
+    --input: 213.103448 12.446352% 54.313725%;
+    --ring: 218.928571 70% 47.058824%;
+    --surface: 0 0% 100%;
     --table-header: var(--surface);
-    --page: 210 22.222222% 96.470588%; /* #F4F6F8 */
-    --hover: 210 22.222222% 96.470588%; /* #F4F6F8 */
-    --fg-secondary: 214 14.423077% 40.784314%; /* #596677 */
-    --fg-disabled: 213.103448 12.446352% 54.313725%; /* #7C8999 */
-    --info-text: 214 14.423077% 40.784314%; /* #596677 */
-    --info-bg: 210 22.222222% 96.470588%; /* #F4F6F8 */
-    --accent-ds-text: 214 14.423077% 40.784314%; /* #596677 */
-    --accent-ds-bg: 210 22.222222% 96.470588%; /* #F4F6F8 */
-    --muted-ds-text: 214 14.423077% 40.784314%; /* #596677 */
-    --muted-ds-bg: 210 22.222222% 96.470588%; /* #F4F6F8 */
-    --chart-dau: 214 14.423077% 40.784314%; /* #596677 */
+    --page: 210 22.222222% 96.470588%;
+    --hover: 210 22.222222% 96.470588%;
+    --fg-secondary: 214 14.423077% 40.784314%;
+    --fg-disabled: 213.103448 12.446352% 54.313725%;
+    --info-text: 214 14.423077% 40.784314%;
+    --info-bg: 210 22.222222% 96.470588%;
+    --accent-ds-text: 214 14.423077% 40.784314%;
+    --accent-ds-bg: 210 22.222222% 96.470588%;
+    --muted-ds-text: 214 14.423077% 40.784314%;
+    --muted-ds-bg: 210 22.222222% 96.470588%;
+    --chart-dau: 214 14.423077% 40.784314%;
     --login-panel-ratio: 559 / 720;
     --chart-mau-partial: var(--fg-disabled);
-    --chart-mau: 214 14.423077% 40.784314%; /* #596677 */
-    --brand-google: 0 0% 100%; /* #FFFFFF */
-    --brand-kakao: 0 0% 100%; /* #FFFFFF */
-    --brand-naver: 0 0% 100%; /* #FFFFFF */
-    --brand-naver-fg: 214.736842 22.891566% 16.27451%; /* #202833 */
-    --brand-fg: 214.736842 22.891566% 16.27451%; /* #202833 */
-    --success-text: 154.4 50.33557% 29.215686%; /* #257050 */
-    --success-bg: 150 21.428571% 94.509804%; /* #EEF4F1 */
-    --warning-text: 30 65.47619% 32.941176%; /* #8B541D */
-    --warning-bg: 26.666667 33.333333% 94.705882%; /* #F6F1ED */
-    --danger-text: 353 53.097345% 44.313725%; /* #AD3543 */
-    --danger-bg: 353.333333 39.130435% 95.490196%; /* #F8EFF0 */
+    --chart-mau: 214 14.423077% 40.784314%;
+    --brand-google: 0 0% 100%;
+    --brand-kakao: 0 0% 100%;
+    --brand-naver: 0 0% 100%;
+    --brand-naver-fg: 214.736842 22.891566% 16.27451%;
+    --brand-fg: 214.736842 22.891566% 16.27451%;
+    --success-text: 154.4 50.33557% 29.215686%;
+    --success-bg: 150 21.428571% 94.509804%;
+    --warning-text: 30 65.47619% 32.941176%;
+    --warning-bg: 26.666667 33.333333% 94.705882%;
+    --danger-text: 353 53.097345% 44.313725%;
+    --danger-bg: 353.333333 39.130435% 95.490196%;
     /* Resolve before Sonner shadows --success-text with a complete color. */
     --toast-success-color: hsl(var(--success-text));
     --radius: 12px;
@@ -142,8 +140,6 @@
     opacity: 1;
   }
 }
-
-/* Sonner keeps its queue, layout variables, gestures and 3s dismissal. */
 .toaster[data-sonner-toaster] {
   @apply font-sans;
   --normal-bg: hsl(var(--surface));

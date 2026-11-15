@@ -1,8 +1,4 @@
 import remarkGfm from 'remark-gfm';
 
-/**
- * 마크다운 렌더 공용 설정 (04 §9-10, D6).
- * GFM 지원. HTML 렌더링은 허용 안 함(XSS 방지) — react-markdown 기본값 유지.
- * 사용처: shared/components/markdown (MarkdownViewer·MarkdownEditor — 공지/문제 본문).
- */
+/** XSS 방지를 위해 react-markdown의 기본 HTML 비허용 정책을 유지합니다(D6). */
 export const remarkPlugins = [remarkGfm];

@@ -1,4 +1,3 @@
-// Vitest 공통 setup (vite.config.ts test.setupFiles). jest-dom 매처와 jsdom 에 없는 브라우저 API 보강.
 import '@testing-library/jest-dom/vitest';
 import { cleanup } from '@testing-library/react';
 import { afterEach } from 'vitest';
