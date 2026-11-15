@@ -1,7 +1,10 @@
+import { inquiryAnswerSchema } from '@/features/inquiries/schemas';
 import { http, HttpResponse } from 'msw';
 import { format, subDays, subMonths } from 'date-fns';
 import { qaHandlers } from '@/mocks/qaHandlers';
 import { ravvitHandlers } from '@/mocks/ravvitHandlers';
+
+const inquiryAnswerBodySchema = inquiryAnswerSchema.pick({ content: true });
 
 export const handlers = [
   ...ravvitHandlers,
@@ -38,7 +41,6 @@ export const handlers = [
     }),
   ),
 
-  // 활성 유저 추이 (D7) — 결정적 유사 파형, 오래된→최신 순 연속 배열
   http.get('*/api/v1/admin/dashboard/active-users/daily', ({ request }) => {
     const days = Number(new URL(request.url).searchParams.get('days') ?? '30');
     const today = new Date();
@@ -365,7 +367,6 @@ export const handlers = [
 
   http.patch('*/api/v1/admin/staging/answers/:answerId', () => new HttpResponse(null, { status: 200 })),
 
-  // 스테이징 promote PENDING→COMPLETED (03 §8-7, 200). ⚠️ 실제 prod INSERT는 백엔드/사람 — 여기선 mock.
   http.patch('*/api/v1/admin/staging/labels/:label/status', () => new HttpResponse(null, { status: 200 })),
 
   http.get('*/api/v1/admin/users', ({ request }) => {
@@ -437,7 +438,6 @@ export const handlers = [
   ),
   http.patch('*/api/v1/admin/reports/:reportId/status', () => new HttpResponse(null, { status: 200 })),
 
-  // 문의 목록 (inquiry-handoff A-2-1, status 필터). ⚠️ hasNext/contents/1-base, datetime Z 없음.
   http.get('*/api/v1/admin/inquiries', ({ request }) => {
     const status = new URL(request.url).searchParams.get('status');
     const all = [
@@ -480,7 +480,7 @@ export const handlers = [
 
   http.post('*/api/v1/admin/inquiries/:inquiryId/answer', async ({ params, request }) => {
     const inquiryId = Number(params.inquiryId);
-    const body = (await request.json()) as { content: string };
+    const body = inquiryAnswerBodySchema.parse(await request.json());
     return HttpResponse.json(
       {
         inquiryId,
@@ -507,7 +507,7 @@ export const handlers = [
 
   http.put('*/api/v1/admin/inquiries/:inquiryId/answer', async ({ params, request }) => {
     const inquiryId = Number(params.inquiryId);
-    const body = (await request.json()) as { content: string };
+    const body = inquiryAnswerBodySchema.parse(await request.json());
     return HttpResponse.json({
       inquiryId,
       title: '결제했는데 코인이 안 들어와요',
@@ -531,6 +531,5 @@ export const handlers = [
 
   http.delete('*/api/v1/admin/inquiries/:inquiryId/answer', () => new HttpResponse(null, { status: 204 })),
 
-  // QA(gravit-qa) — 별도 서비스 목업 (decisions D9-4)
   ...qaHandlers,
 ];
