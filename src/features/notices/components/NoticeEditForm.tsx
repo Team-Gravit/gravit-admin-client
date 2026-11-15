@@ -19,6 +19,7 @@ import { noticeStatusLabels } from '@/shared/constants/labels';
 import type { NoticeStatus } from '@/shared/constants/enums';
 import {
   noticeEditFormSchema,
+  noticeStatusSchema,
   type NoticeDetail,
   type NoticeEditFormValues,
 } from '@/features/notices/schemas';
@@ -98,7 +99,10 @@ export function NoticeEditForm({ notice, onCancel, onSaved }: NoticeEditFormProp
         <FormField label="상태" required error={errors.status?.message}>
           <Select
             value={watch('status')}
-            onValueChange={(value) => setValue('status', value as NoticeStatus, { shouldDirty: true })}
+            onValueChange={(value) => {
+              const parsed = noticeStatusSchema.safeParse(value);
+              if (parsed.success) setValue('status', parsed.data, { shouldDirty: true });
+            }}
           >
             <SelectTrigger className="w-48" disabled={allowedStatuses.length === 1}>
               <SelectValue />

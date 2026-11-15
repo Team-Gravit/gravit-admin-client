@@ -1,3 +1,5 @@
+import { z } from 'zod';
+import { inquiryStatusSchema } from '@/features/inquiries/schemas';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { ROUTES } from '@/shared/constants/routes';
@@ -19,9 +21,11 @@ import type { InquiryListItem } from '@/features/inquiries/schemas';
 
 type StatusFilter = InquiryStatus | 'ALL';
 
+const statusFilterSchema = inquiryStatusSchema.or(z.literal('ALL'));
+
 export function InquiryListPage() {
   const navigate = useNavigate();
-  const [page, setPage] = useState(1); // ⚠️ 1-base (백오피스 공통)
+  const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('PENDING');
 
   const { data, isLoading, isError, refetch } = useInquiries({
@@ -30,7 +34,9 @@ export function InquiryListPage() {
   });
 
   const handleStatusChange = (value: string) => {
-    setStatusFilter(value as StatusFilter);
+    const parsed = statusFilterSchema.safeParse(value);
+    if (!parsed.success) return;
+    setStatusFilter(parsed.data);
     setPage(1);
   };
 

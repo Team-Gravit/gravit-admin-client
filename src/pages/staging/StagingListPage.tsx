@@ -1,3 +1,5 @@
+import { z } from 'zod';
+import { stagingStatusSchema } from '@/features/staging/schemas';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { ROUTES } from '@/shared/constants/routes';
@@ -17,6 +19,8 @@ import { StagingStatusBadge } from '@/features/staging/components/StagingStatusB
 import type { StagingLabelListItem } from '@/features/staging/schemas';
 
 type StatusFilter = StagingStatus | 'ALL';
+
+const statusFilterSchema = stagingStatusSchema.or(z.literal('ALL'));
 
 export function StagingListPage() {
   const navigate = useNavigate();
@@ -62,7 +66,9 @@ export function StagingListPage() {
   ];
 
   const handleFilterChange = (value: string) => {
-    setStatusFilter(value as StatusFilter);
+    const parsed = statusFilterSchema.safeParse(value);
+    if (!parsed.success) return;
+    setStatusFilter(parsed.data);
     setPage(1);
   };
 

@@ -1,3 +1,5 @@
+import { z } from 'zod';
+import { reportTypeSchema } from '@/features/reports/schemas';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { ROUTES } from '@/shared/constants/routes';
@@ -21,6 +23,9 @@ import type { ReportListItem } from '@/features/reports/schemas';
 type TypeFilter = ReportType | 'ALL';
 type ResolvedFilter = 'ALL' | 'false' | 'true';
 
+const typeFilterSchema = reportTypeSchema.or(z.literal('ALL'));
+const resolvedFilterSchema = z.enum(['false', 'true']).or(z.literal('ALL'));
+
 export function ReportListPage() {
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
@@ -34,11 +39,15 @@ export function ReportListPage() {
   });
 
   const handleTypeChange = (value: string) => {
-    setTypeFilter(value as TypeFilter);
+    const parsed = typeFilterSchema.safeParse(value);
+    if (!parsed.success) return;
+    setTypeFilter(parsed.data);
     setPage(1);
   };
   const handleResolvedChange = (value: string) => {
-    setResolvedFilter(value as ResolvedFilter);
+    const parsed = resolvedFilterSchema.safeParse(value);
+    if (!parsed.success) return;
+    setResolvedFilter(parsed.data);
     setPage(1);
   };
 

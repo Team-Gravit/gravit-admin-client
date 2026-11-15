@@ -14,7 +14,7 @@ import {
 } from '@/shared/components/ui/select';
 import { ErrorState } from '@/shared/components/states/ErrorState';
 import { LoadingSkeleton } from '@/shared/components/states/LoadingSkeleton';
-import type { UserRole, UserStatus } from '@/shared/constants/enums';
+import { userRoleSchema, userStatusSchema } from '@/features/users/schemas';
 import { useUser } from '@/features/users/queries';
 import { useUpdateUserRole, useUpdateUserStatus } from '@/features/users/mutations';
 import { UserStatusBadge } from '@/features/users/components/UserStatusBadge';
@@ -79,7 +79,9 @@ export function UserDetailPage() {
           <Select
             value={data.role}
             onValueChange={(value) => {
-              if (value !== data.role) setPending({ kind: 'role', value: value as UserRole });
+              const parsed = userRoleSchema.safeParse(value);
+              if (parsed.success && parsed.data !== data.role)
+                setPending({ kind: 'role', value: parsed.data });
             }}
           >
             <SelectTrigger className="w-40">
@@ -98,7 +100,9 @@ export function UserDetailPage() {
           <Select
             value={data.status}
             onValueChange={(value) => {
-              if (value !== data.status) setPending({ kind: 'status', value: value as UserStatus });
+              const parsed = userStatusSchema.safeParse(value);
+              if (parsed.success && parsed.data !== data.status)
+                setPending({ kind: 'status', value: parsed.data });
             }}
           >
             <SelectTrigger className="w-40">

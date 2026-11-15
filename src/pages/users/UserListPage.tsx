@@ -1,3 +1,5 @@
+import { z } from 'zod';
+import { userStatusSchema, userRoleSchema } from '@/features/users/schemas';
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router';
 import { Search } from 'lucide-react';
@@ -23,6 +25,9 @@ import type { UserListItem } from '@/features/users/schemas';
 type StatusFilter = UserStatus | 'ALL';
 type RoleFilter = UserRole | 'ALL';
 
+const statusFilterSchema = userStatusSchema.or(z.literal('ALL'));
+const roleFilterSchema = userRoleSchema.or(z.literal('ALL'));
+
 export function UserListPage() {
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
@@ -45,11 +50,15 @@ export function UserListPage() {
   };
 
   const handleStatusChange = (value: string) => {
-    setStatusFilter(value as StatusFilter);
+    const parsed = statusFilterSchema.safeParse(value);
+    if (!parsed.success) return;
+    setStatusFilter(parsed.data);
     setPage(1);
   };
   const handleRoleChange = (value: string) => {
-    setRoleFilter(value as RoleFilter);
+    const parsed = roleFilterSchema.safeParse(value);
+    if (!parsed.success) return;
+    setRoleFilter(parsed.data);
     setPage(1);
   };
 
