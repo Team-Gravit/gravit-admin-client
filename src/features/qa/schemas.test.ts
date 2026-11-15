@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { fixReportsSchema } from '@/features/qa/schemas';
 
-// G1 GET /sprints/{id}/fix-reports 응답 (docs/conventions/decisions.md D12).
 const readyReports = {
   sprintId: 7,
   status: 'CLOSED',

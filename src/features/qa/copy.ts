@@ -1,4 +1,3 @@
-/** QA v2 UI copy, D11. Server messages take precedence for domain failures. */
 export const NOTICE_COPY = {
   CELL_BEFORE_MANUAL_REVIEW: '1차 검수가 끝나면 변경할 수 있어요.',
   MANUAL: 'QA 매뉴얼',

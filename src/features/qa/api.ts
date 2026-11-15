@@ -25,7 +25,6 @@ import {
   type Round,
 } from '@/features/qa/schemas';
 
-/** D11 / SESSION_E1. No implicit filters, rounds, or legacy fields. */
 export async function listSprints() {
   return parseQaResponse(sprintListResponseSchema, await qaApiClient.get('/sprints'));
 }

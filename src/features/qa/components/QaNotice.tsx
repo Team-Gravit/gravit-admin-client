@@ -2,10 +2,7 @@ import type { ReactNode } from 'react';
 import { AlertTriangle, Info } from 'lucide-react';
 import { cn } from '@/shared/lib/cn';
 
-/**
- * QA_SPEC F-4 안내 한 줄. tone=warning 은 경고(C절 경고 = warning 톤).
- * text-caption 은 cn(twMerge) 안에서 색 클래스와 같은 그룹으로 취급돼 지워지므로 cn 밖에 붙인다.
- */
+/** text-caption은 cn(twMerge)의 색 클래스와 충돌하므로 cn 밖에 붙입니다. */
 export function QaNotice({
   children,
   tone = 'info',

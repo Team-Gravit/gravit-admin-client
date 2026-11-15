@@ -30,10 +30,7 @@ interface SprintCreateModalProps {
   onCreated: (sprint: Sprint) => void;
 }
 
-/**
- * 스프린트 등록 모달 (QA_SPEC B-0, A-3 #2).
- * 404·409·400 은 모달을 유지한 채 입력 아래에 표시하고, 그 밖의 실패는 토스트로 알린다.
- */
+/** 404·409·400은 모달 안에 표시하고, 그 밖의 실패는 토스트로 알립니다. */
 export function SprintCreateModal({ open, onOpenChange, onCreated }: SprintCreateModalProps) {
   const createSprint = useCreateSprint();
   const form = useForm<SprintCreateFormValues>({
@@ -59,7 +56,7 @@ export function SprintCreateModal({ open, onOpenChange, onCreated }: SprintCreat
         },
         onError: (error) => {
           if (error instanceof QaApiError) {
-            // 재발급 실패 = 강제 로그아웃이 이미 안내했다(D9-3).
+
             if (error.sessionEnded) return;
             if (error.status === 404) return showFieldError(ERROR_COPY.NOTION_NOT_FOUND);
             if (error.status === 409) return showFieldError(ERROR_COPY.SPRINT_DUPLICATED);

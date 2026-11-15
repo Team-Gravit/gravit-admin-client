@@ -4,7 +4,8 @@ import { showErrorToast } from '@/shared/api/errorHandler';
 import { QaApiError } from '@/shared/api/qaClient';
 import { downloadBlob } from '@/shared/lib/downloadBlob';
 import * as api from '@/features/qa/api';
-import { qaKeys } from '@/features/qa/queries';
+import { qaKeys } from '@/features/qa/queryKeys';
+import { refreshSprint, replaceCheckCell, replaceDesignItem } from '@/features/qa/cache';
 import { ERROR_COPY, NOTICE_COPY, TOAST_COPY } from '@/features/qa/copy';
 import type {
   CellState,
@@ -17,17 +18,6 @@ import type {
   Round,
 } from '@/features/qa/schemas';
 
-/** All aggregate rates come back from the server; never recompute progress in the UI. */
-export function refreshSprint(client: QueryClient, id: number) {
-  return Promise.all([
-    client.invalidateQueries({ queryKey: qaKeys.sprint(id) }),
-    client.invalidateQueries({ queryKey: qaKeys.sprintLists() }),
-    client.invalidateQueries({ queryKey: qaKeys.checklists(id) }),
-    client.invalidateQueries({ queryKey: qaKeys.design(id) }),
-    client.invalidateQueries({ queryKey: qaKeys.reflections(id) }),
-    client.invalidateQueries({ queryKey: qaKeys.fixReports(id) }),
-  ]);
-}
 function mutationError(client: QueryClient, id: number, error: unknown) {
   if (error instanceof QaApiError && error.sessionEnded) return;
   if (error instanceof QaApiError && error.status === 409) {
@@ -72,7 +62,7 @@ export function useStartSetupJob(id: number) {
     mutationFn: (version: number) => api.startSetupJob(id, version),
     meta,
     onSuccess: async ({ jobId }) => {
-      // Start returns only an ID. Fetch the existing JobResponse instead of inventing fields.
+
       await refreshSprint(client, id);
       void client.invalidateQueries({ queryKey: qaKeys.job(jobId) });
       toast.success(TOAST_COPY.SETUP_STARTED);
@@ -136,7 +126,7 @@ export function useUpdateChecklistItem(id: number) {
     meta,
     onSuccess: async (item) => {
       await refreshSprint(client, id);
-      void client.invalidateQueries({ queryKey: ['qa', 'cellHistory', item.id] });
+      void client.invalidateQueries({ queryKey: qaKeys.cellHistories(item.id) });
       toast.success(TOAST_COPY.ITEM_UPDATED);
     },
     onError: (error) => mutationError(client, id, error),
@@ -173,20 +163,8 @@ export function useUpdateCheckCell(id: number, round: Round) {
     }) => api.updateCheckCell(itemId, part, state, version, reason),
     meta,
     onSuccess: async (cell, { itemId, part }) => {
-      client.setQueryData<Checklist>(
-        qaKeys.checklist(id, round),
-        (prev) =>
-          prev && {
-            ...prev,
-            features: prev.features.map((f) => ({
-              ...f,
-              items: f.items.map((i) =>
-                i.id !== itemId
-                  ? i
-                  : { ...i, cells: i.cells.map((c) => (c.part === part ? cell : c)) },
-              ),
-            })),
-          },
+      client.setQueryData<Checklist>(qaKeys.checklist(id, round), (prev) =>
+        replaceCheckCell(prev, itemId, part, cell),
       );
       await refreshSprint(client, id);
       void client.invalidateQueries({ queryKey: qaKeys.cellHistory(itemId, part) });
@@ -210,17 +188,7 @@ export function useUpdateDesignItem(id: number) {
     }) => api.updateDesignItem(itemId, state, version, reason),
     meta,
     onSuccess: async (item) => {
-      client.setQueryData<DesignReview>(
-        qaKeys.design(id),
-        (prev) =>
-          prev && {
-            ...prev,
-            features: prev.features.map((f) => ({
-              ...f,
-              items: f.items.map((i) => (i.id === item.id ? item : i)),
-            })),
-          },
-      );
+      client.setQueryData<DesignReview>(qaKeys.design(id), (prev) => replaceDesignItem(prev, item));
       await refreshSprint(client, id);
       void client.invalidateQueries({ queryKey: qaKeys.designHistory(item.id) });
     },

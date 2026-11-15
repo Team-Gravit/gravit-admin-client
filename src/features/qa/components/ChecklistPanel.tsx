@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Pencil, Trash2 } from 'lucide-react';
 import { QaApiError } from '@/shared/api/qaClient';
 import { Button } from '@/shared/components/ui/button';
 import {
@@ -9,27 +8,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/shared/components/ui/select';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/shared/components/ui/table';
 import { QaConfirmModal } from '@/features/qa/components/QaConfirmModal';
 import { EmptyState } from '@/shared/components/states/EmptyState';
 import { ErrorState } from '@/shared/components/states/ErrorState';
 import { LoadingSkeleton } from '@/shared/components/states/LoadingSkeleton';
 import { hasRunningSetup, isStageRunning, useChecklist } from '@/features/qa/queries';
 import { useDeleteChecklistItem } from '@/features/qa/mutations';
+import { ChecklistFeatureSection } from '@/features/qa/components/ChecklistFeatureSection';
+import {
+  filterChecklistFeatures,
+  checklistNavigationEntries,
+} from '@/features/qa/checklistSelectors';
 import { useNextUnchecked } from '@/features/qa/useNextUnchecked';
-import { CheckCellButton } from '@/features/qa/components/CheckCellButton';
 import { ChecklistItemFormModal } from '@/features/qa/components/ChecklistItemFormModal';
 import { QaStageActivity } from '@/features/qa/components/QaStageActivity';
-import { FeatureGroupHeader } from '@/features/qa/components/FeatureGroupHeader';
 import { ProgressGauges } from '@/features/qa/components/ProgressGauges';
-import { PartChips } from '@/features/qa/components/PartChips';
 import { QaNotice } from '@/features/qa/components/QaNotice';
 import { NOTICE_COPY } from '@/features/qa/copy';
 import { PART_LABELS, PART_ORDER } from '@/features/qa/labels';
@@ -66,25 +59,8 @@ export function ChecklistPanel({ sprint, round }: { sprint: Sprint; round: Round
   );
   const locked = closed || running;
   const parts = filter === 'ALL' ? PART_ORDER : [filter];
-  const features = (query.data?.features ?? [])
-    .map((feature) => ({
-      ...feature,
-      items: feature.items.filter((item) => filter === 'ALL' || item.parts.includes(filter)),
-    }))
-    .filter((feature) => filter === 'ALL' || feature.items.length > 0);
-  const next = useNextUnchecked(
-    features.flatMap((f) =>
-      f.items.flatMap((i) =>
-        parts.map((part) => ({
-          key: `${i.id}:${part}`,
-          featureId: f.featureId,
-          unchecked:
-            !closed &&
-            i.cells.some((c) => c.part === part && c.state === 'UNCHECKED' && c.editable),
-        })),
-      ),
-    ),
-  );
+  const features = filterChecklistFeatures(query.data?.features ?? [], filter);
+  const next = useNextUnchecked(checklistNavigationEntries(features, parts, closed));
   if (query.isLoading) return tabRunning ? activity : <LoadingSkeleton />;
   if (query.isError) {
     const view = qaErrorView(query.error);
@@ -133,126 +109,21 @@ export function ChecklistPanel({ sprint, round }: { sprint: Sprint; round: Round
         )
       ) : (
         features.map((feature) => (
-          <section
+          <ChecklistFeatureSection
             key={feature.featureId}
-            aria-label={`${feature.screenId} ${feature.screenName}`}
-            className="overflow-hidden rounded-lg border border-border bg-surface"
-          >
-            <FeatureGroupHeader
-              feature={feature}
-              collapsed={next.collapsed.has(feature.featureId)}
-              onToggle={() => next.toggle(feature.featureId)}
-            >
-              {round === 2 && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  disabled={locked}
-                  onClick={() => setForm({ feature })}
-                >
-                  항목 추가
-                </Button>
-              )}
-            </FeatureGroupHeader>
-            {!next.collapsed.has(feature.featureId) && (
-              <Table className="table-fixed">
-                <colgroup>
-                  <col />
-                  {parts.map((part) => (
-                    <col key={part} className="w-28" />
-                  ))}
-                  <col className="w-32" />
-                </colgroup>
-                <TableHeader>
-                  <TableRow className="hover:bg-transparent">
-                    <TableHead>항목</TableHead>
-                    {parts.map((part) => (
-                      <TableHead key={part} className="text-center">
-                        {PART_LABELS[part]}
-                      </TableHead>
-                    ))}
-                    <TableHead>
-                      <span className="sr-only">항목 관리</span>
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {feature.items.map((item) => (
-                    <TableRow
-                      key={item.id}
-                      className="hover:bg-transparent"
-                      aria-label={item.title}
-                    >
-                      <TableCell className="break-words">
-                        <div className="flex flex-col gap-1">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <h3 className="text-body font-semibold text-foreground">
-                              {item.title}
-                            </h3>
-                            <PartChips parts={item.parts} />
-                          </div>
-                          <p className="whitespace-pre-wrap text-body text-fg-secondary">
-                            {item.expected}
-                          </p>
-                        </div>
-                      </TableCell>
-                      {parts.map((part) => {
-                        const cell = item.cells.find((c) => c.part === part);
-                        const key = `${item.id}:${part}`;
-                        return (
-                          <TableCell key={part} className="text-center">
-                            {cell ? (
-                              <CheckCellButton
-                                sprintId={sprint.id}
-                                round={round}
-                                item={item}
-                                cell={cell}
-                                closed={closed}
-                                sprintStatus={sprint.status}
-                                registerRef={(el) => next.register(key, el)}
-                                onFocusCell={() => next.onFocus(key)}
-                              />
-                            ) : (
-                              <span className="text-fg-muted">-</span>
-                            )}
-                          </TableCell>
-                        );
-                      })}
-                      <TableCell>
-                        <div className="flex gap-1">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            disabled={locked}
-                            aria-label="수정"
-                            title="항목 수정"
-                            className="px-2"
-                            onClick={() => setForm({ feature, item })}
-                          >
-                            <Pencil aria-hidden />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="px-2 text-danger-text"
-                            aria-label="삭제"
-                            title="항목 삭제"
-                            disabled={locked}
-                            onClick={() => {
-                              remove.reset();
-                              setDeleting(item);
-                            }}
-                          >
-                            <Trash2 aria-hidden />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </section>
+            feature={feature}
+            sprint={sprint}
+            round={round}
+            parts={parts}
+            locked={locked}
+            navigation={next}
+            onAdd={() => setForm({ feature })}
+            onEdit={(item) => setForm({ feature, item })}
+            onDelete={(item) => {
+              remove.reset();
+              setDeleting(item);
+            }}
+          />
         ))
       )}
       {form && (

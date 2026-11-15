@@ -1,26 +1,14 @@
-import { QaTooltipContent } from '@/features/qa/components/QaTooltipContent';
-import { CELL_CATEGORIES } from '@/features/qa/status';
+import { DesignVerdictMenu } from '@/features/qa/components/DesignVerdictMenu';
 import { useRef, useState } from 'react';
-import { ChevronDown, Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import { TableCell, TableRow } from '@/shared/components/ui/table';
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/shared/components/ui/dropdown-menu';
-import { Tooltip, TooltipTrigger } from '@/shared/components/ui/tooltip';
 import { QaApiError } from '@/shared/api/qaClient';
 import { useDeleteDesignItem, useUpdateDesignItem } from '@/features/qa/mutations';
 import { DesignHistoryModal } from '@/features/qa/components/DesignHistoryModal';
 import { FailReasonModal } from '@/features/qa/components/FailReasonModal';
 import { DesignItemFormModal } from '@/features/qa/components/DesignItemFormModal';
 import { QaConfirmModal } from '@/features/qa/components/QaConfirmModal';
-import { QaStatusIcon } from '@/features/qa/components/QaStatusIcon';
-import { CELL_STATE_LABELS, PART_LABELS } from '@/features/qa/labels';
 import { NOTICE_COPY } from '@/features/qa/copy';
 import type { DesignItem } from '@/features/qa/schemas';
 
@@ -61,102 +49,35 @@ export function DesignReviewItem({
             {item.platform !== platform ? (
               <span className="text-fg-muted">—</span>
             ) : (
-              <DropdownMenu
-                modal={false}
-                open={menu}
+              <DesignVerdictMenu
+                item={item}
+                locked={locked}
+                pending={update.isPending}
+                menu={menu}
+                overlayOpen={history || editing || deleting || failReason}
+                triggerRef={triggerRef}
+                registerRef={registerRef}
+                onFocus={onFocus}
                 onOpenChange={(open) => setMenu(open && !update.isPending)}
-              >
-                <Tooltip
-                  open={
-                    item.state === 'PASS' ||
-                    item.state === 'FAIL' ||
-                    menu ||
-                    history ||
-                    editing ||
-                    deleting ||
-                    failReason ||
-                    update.isPending
-                      ? false
-                      : undefined
+                onChooseState={(state) => {
+                  setMenu(false);
+                  if (update.isPending) return;
+                  if (state === 'FAIL' && item.state !== 'FAIL') {
+                    update.reset();
+                    setFailReason(true);
+                    return;
                   }
-                >
-                  <TooltipTrigger asChild>
-                    <DropdownMenuTrigger asChild>
-                      <button
-                        ref={(element) => {
-                          triggerRef.current = element;
-                          registerRef(element);
-                        }}
-                        type="button"
-                        onFocus={onFocus}
-                        aria-disabled={update.isPending}
-                        aria-busy={update.isPending}
-                        aria-label={`${PART_LABELS[item.platform]} ${CELL_STATE_LABELS[item.state]} — ${locked ? '변경 이력' : '변경'}`}
-                        className="relative inline-flex h-10 w-16 items-center justify-center rounded-md hover:bg-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                      >
-                        <QaStatusIcon
-                          category={CELL_CATEGORIES[item.state]}
-                          label={CELL_STATE_LABELS[item.state]}
-                          tooltip={false}
-                          pending={update.isPending}
-                        />
-                        {!locked && (
-                          <ChevronDown
-                            className="absolute right-0 size-3.5 text-fg-muted"
-                            aria-hidden
-                          />
-                        )}
-                      </button>
-                    </DropdownMenuTrigger>
-                  </TooltipTrigger>
-                  <QaTooltipContent side="bottom">{CELL_STATE_LABELS[item.state]}</QaTooltipContent>
-                </Tooltip>
-                <DropdownMenuContent
-                  align="center"
-                  onPointerDownOutside={(event) => {
-                    if (event.target instanceof Node && triggerRef.current?.contains(event.target))
-                      event.preventDefault();
-                  }}
-                >
-                  {!locked && (
-                    <>
-                      {(['UNCHECKED', 'PASS', 'FAIL', 'NOT_APPLICABLE'] as const).map((state) => (
-                        <DropdownMenuCheckboxItem
-                          key={state}
-                          checked={item.state === state}
-                          onCheckedChange={() => {
-                            setMenu(false);
-                            if (update.isPending) return;
-                            if (state === 'FAIL' && item.state !== 'FAIL') {
-                              update.reset();
-                              setFailReason(true);
-                              return;
-                            }
-                            if (!update.isPending && item.state !== state)
-                              update.mutate({ itemId: item.id, state, version: item.version });
-                          }}
-                        >
-                          {CELL_STATE_LABELS[state]}
-                        </DropdownMenuCheckboxItem>
-                      ))}
-                      {item.state === 'FAIL' && (
-                        <DropdownMenuItem
-                          onSelect={() => {
-                            if (update.isPending) return;
-                            setMenu(false);
-                            update.reset();
-                            setFailReason(true);
-                          }}
-                        >
-                          {NOTICE_COPY.FAIL_REASON_EDIT}
-                        </DropdownMenuItem>
-                      )}
-                      <DropdownMenuSeparator />
-                    </>
-                  )}
-                  <DropdownMenuItem onSelect={() => setHistory(true)}>변경 이력</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                  if (!update.isPending && item.state !== state)
+                    update.mutate({ itemId: item.id, state, version: item.version });
+                }}
+                onEditReason={() => {
+                  if (update.isPending) return;
+                  setMenu(false);
+                  update.reset();
+                  setFailReason(true);
+                }}
+                onHistory={() => setHistory(true)}
+              />
             )}
           </TableCell>
         ))}

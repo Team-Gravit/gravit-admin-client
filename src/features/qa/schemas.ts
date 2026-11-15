@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { NOTICE_COPY } from '@/features/qa/copy';
 import { FIELD_LIMITS } from '@/shared/constants/fieldLimits';
 
-/** D11 / SESSION_E1 + P1~P10. Nullable keys are present in the JSON contract. */
+/** nullable 필드도 응답 JSON에 키가 존재해야 합니다(D11). */
 export const sprintStatusSchema = z.enum([
   'DRAFT',
   'SPEC_LOAD',
@@ -43,7 +43,7 @@ export const jobStepSchema = z.object({
   startedAt: z.string().nullable(),
   finishedAt: z.string().nullable(),
 });
-/** JobResponse is unchanged (P1). */
+
 export const jobSchema = z.object({
   id: z.number(),
   type: z.enum(['SPEC_LOAD', 'QA_PREPARE']),

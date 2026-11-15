@@ -1,5 +1,7 @@
 import { useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { qaKeys } from '@/features/qa/queryKeys';
+import { refreshSprint } from '@/features/qa/cache';
 import { qaQueryRetry } from '@/shared/api/qaClient';
 import {
   getChecklist,
@@ -14,19 +16,6 @@ import {
 } from '@/features/qa/api';
 import type { Job, JobStatus, Part, Round, SetupStepKey, Sprint } from '@/features/qa/schemas';
 
-export const qaKeys = {
-  all: ['qa'] as const,
-  sprintLists: () => ['qa', 'sprints', 'list'] as const,
-  sprint: (id: number) => ['qa', 'sprints', 'detail', id] as const,
-  job: (id: number) => ['qa', 'jobs', id] as const,
-  checklists: (id: number) => ['qa', 'checklists', id] as const,
-  checklist: (id: number, round: Round) => ['qa', 'checklists', id, round] as const,
-  design: (id: number) => ['qa', 'design', id] as const,
-  reflections: (id: number) => ['qa', 'reflections', id] as const,
-  cellHistory: (id: number, part: Part) => ['qa', 'cellHistory', id, part] as const,
-  designHistory: (id: number) => ['qa', 'designHistory', id] as const,
-  fixReports: (id: number) => ['qa', 'fixReports', id] as const,
-};
 export const isJobActive = (status: JobStatus | undefined) =>
   status === 'QUEUED' || status === 'RUNNING';
 export const hasRunningSetup = (sprint: Sprint) => isJobActive(sprint.latestJob?.status);
@@ -65,12 +54,7 @@ export function useSetupJob(sprintId: number, latestJob: Job | null) {
   const updatedAt = query.dataUpdatedAt;
   useEffect(() => {
     if (!job || !updatedAt) return;
-    void client.invalidateQueries({ queryKey: qaKeys.sprint(sprintId) });
-    void client.invalidateQueries({ queryKey: qaKeys.sprintLists() });
-    void client.invalidateQueries({ queryKey: qaKeys.checklists(sprintId) });
-    void client.invalidateQueries({ queryKey: qaKeys.design(sprintId) });
-    void client.invalidateQueries({ queryKey: qaKeys.reflections(sprintId) });
-    void client.invalidateQueries({ queryKey: qaKeys.fixReports(sprintId) });
+    void refreshSprint(client, sprintId);
   }, [job, updatedAt, sprintId, client]);
   return query;
 }
