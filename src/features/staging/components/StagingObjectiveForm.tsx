@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useQueryClient } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/shared/lib/cn';
@@ -13,8 +12,8 @@ import { FormField } from '@/shared/components/form/FormField';
 import { FieldError } from '@/shared/components/form/FieldError';
 import { ProblemTypeBadge } from '@/shared/components/status-badge/ProblemTypeBadge';
 import { MarkdownEditor } from '@/shared/components/markdown/MarkdownEditor';
-import { updateStagingOption, updateStagingProblem } from '@/features/staging/api';
-import { stagingKeys } from '@/features/staging/queries';
+import { buildObjectiveSaveTasks } from '@/features/staging/objectiveSaveTasks';
+import { useStagingSave } from '@/features/staging/useStagingSave';
 import {
   stagingObjectiveFormSchema,
   type StagingObjectiveProblem,
@@ -40,8 +39,7 @@ export function StagingObjectiveForm({
   onDirtyChange,
   readOnly,
 }: StagingObjectiveFormProps) {
-  const queryClient = useQueryClient();
-  const [isSaving, setIsSaving] = useState(false);
+  const { isSaving, save } = useStagingSave(label);
   const originalAnswerOptionId = problem.options.find((option) => option.isAnswer)?.optionId ?? 0;
 
   const form = useForm<StagingObjectiveFormValues>({
@@ -77,72 +75,15 @@ export function StagingObjectiveForm({
 
   const onSubmit = form.handleSubmit(
     async (values) => {
-      const tasks: Array<{ run: () => Promise<unknown>; commit: () => void }> = [];
-
-      const problemBody: { instruction?: string; content?: string } = {};
-      if (dirtyFields.instruction) problemBody.instruction = values.instruction;
-      if (dirtyFields.content) problemBody.content = values.content;
-      if (Object.keys(problemBody).length > 0) {
-        tasks.push({
-          run: () => updateStagingProblem(problem.problemId, problemBody),
-          commit: () => {
-            if (problemBody.instruction !== undefined)
-              form.resetField('instruction', { defaultValue: values.instruction });
-            if (problemBody.content !== undefined)
-              form.resetField('content', { defaultValue: values.content });
-          },
-        });
-      }
-      values.options.forEach((option, index) => {
-        const optionBody: { content?: string; explanation?: string } = {};
-        if (dirtyFields.options?.[index]?.content) optionBody.content = option.content;
-        if (dirtyFields.options?.[index]?.explanation) optionBody.explanation = option.explanation;
-        if (Object.keys(optionBody).length > 0) {
-          tasks.push({
-            run: () => updateStagingOption(option.optionId, optionBody),
-            commit: () => {
-              if (optionBody.content !== undefined)
-                form.resetField(`options.${index}.content`, { defaultValue: option.content });
-              if (optionBody.explanation !== undefined)
-                form.resetField(`options.${index}.explanation`, {
-                  defaultValue: option.explanation,
-                });
-            },
-          });
-        }
-      });
-      if (dirtyFields.answerOptionId && values.answerOptionId !== originalAnswerOptionId) {
-        const newAnswerOptionId = values.answerOptionId;
-        tasks.push({
-          run: () =>
-            Promise.all([
-              updateStagingOption(originalAnswerOptionId, { isAnswer: false }),
-              updateStagingOption(newAnswerOptionId, { isAnswer: true }),
-            ]),
-          commit: () => form.resetField('answerOptionId', { defaultValue: newAnswerOptionId }),
-        });
-      }
-      if (tasks.length === 0) return;
-
-      setIsSaving(true);
-      const results = await Promise.allSettled(tasks.map((task) => task.run()));
-      setIsSaving(false);
-
-      results.forEach((result, index) => {
-        if (result.status === 'fulfilled') tasks[index]?.commit();
-      });
-      const failed = results.filter((result) => result.status === 'rejected').length;
-      if (failed < results.length) {
-        void queryClient.invalidateQueries({ queryKey: stagingKeys.detail(label) });
-      }
-
-      if (failed === 0) {
-        toast.success('저장했어요.');
-      } else if (failed < results.length) {
-        toast.error(`일부 항목만 저장했어요. (${results.length - failed}/${results.length} 성공)`);
-      } else {
-        toast.error('저장하지 못했어요. 다시 시도해 주세요.');
-      }
+      await save(
+        buildObjectiveSaveTasks({
+          problemId: problem.problemId,
+          originalAnswerOptionId,
+          values,
+          dirtyFields,
+          resetField: form.resetField,
+        }),
+      );
     },
     () => toast.error('필수 항목을 확인해 주세요.'),
   );

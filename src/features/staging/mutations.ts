@@ -12,10 +12,6 @@ export function useUpdateStagingLesson(lessonId: number, label: string) {
   });
 }
 
-/**
- * 스테이징 promote (03 §8-7, PENDING→COMPLETED). ⚠️ 비가역 — 실제 실행은 사람 위임.
- * 성공 시 staging 전체 invalidate. (dashboard 요약 invalidate·토스트·이동은 호출 페이지에서 — 04 §10-2-8.)
- */
 export function usePromoteStagingLabel(label: string) {
   const queryClient = useQueryClient();
   return useMutation({

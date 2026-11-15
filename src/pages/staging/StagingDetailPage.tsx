@@ -39,12 +39,7 @@ function CompletedBanner() {
   );
 }
 
-/**
- * STAGING_DETAIL (DS-02 §16, 04 §10-2, 03 §8-2). 헤더 + 좌측 280px 항목 리스트(레슨 1 + 문제 6) + 우측 항목별 편집 폼.
- * 항목별 독립 form(항상 mount + hidden, 미저장 보존) · 변경표시(●/4px) · 변경 필드만 다중 PATCH(allSettled, 부분실패) ·
- * promote(StrictMatch, 비가역=사람) · COMPLETED read-only · 미저장 이탈 보호(beforeunload+useBlocker).
- * Breadcrumb(스테이징 > {label}): 전역 Header 로 발행(04 §8-3).
- */
+/** 독립 폼을 hidden 상태로 유지해 항목 전환 중에도 미저장 입력을 보존합니다. */
 export function StagingDetailPage() {
   const { label = '' } = useParams();
   const navigate = useNavigate();
@@ -68,7 +63,6 @@ export function StagingDetailPage() {
   if (isLoading) return <LoadingSkeleton />;
   if (isError || !data) return <ErrorState onRetry={() => refetch()} />;
 
-  // ⚠️ promote 비가역(03 §8-7, prod INSERT). StrictMatch 게이트 통과 후에만 실행. 04 §10-2-8 흐름.
   const handlePromote = () => {
     promote.mutate(undefined, {
       onSuccess: () => {

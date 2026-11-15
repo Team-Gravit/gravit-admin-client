@@ -47,10 +47,7 @@ export async function updateStagingAnswer(
   await apiClient.patch(`/staging/answers/${answerId}`, body);
 }
 
-/**
- * PATCH /staging/labels/{label}/status — 라벨 promote (03 §8-7). PENDING→COMPLETED.
- * ⚠️ 가장 위험·비가역(prod INSERT). 실제 실행은 사람 위임 — 코드 구조만(StrictMatch 게이트 경유).
- */
+/** promote는 prod INSERT를 일으키는 비가역 작업이므로 실제 실행은 사람에게 맡깁니다(03 §8-7). */
 export async function promoteStagingLabel(label: string): Promise<void> {
   await apiClient.patch(`/staging/labels/${label}/status`, { status: 'COMPLETED' });
 }

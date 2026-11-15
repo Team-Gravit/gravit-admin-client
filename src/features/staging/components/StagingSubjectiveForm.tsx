@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useQueryClient } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/shared/lib/cn';
@@ -11,8 +10,8 @@ import { Textarea } from '@/shared/components/ui/textarea';
 import { FormField } from '@/shared/components/form/FormField';
 import { ProblemTypeBadge } from '@/shared/components/status-badge/ProblemTypeBadge';
 import { MarkdownEditor } from '@/shared/components/markdown/MarkdownEditor';
-import { updateStagingAnswer, updateStagingProblem } from '@/features/staging/api';
-import { stagingKeys } from '@/features/staging/queries';
+import { buildSubjectiveSaveTasks } from '@/features/staging/subjectiveSaveTasks';
+import { useStagingSave } from '@/features/staging/useStagingSave';
 import {
   stagingSubjectiveFormSchema,
   type StagingSubjectiveProblem,
@@ -36,8 +35,7 @@ export function StagingSubjectiveForm({
   onDirtyChange,
   readOnly,
 }: StagingSubjectiveFormProps) {
-  const queryClient = useQueryClient();
-  const [isSaving, setIsSaving] = useState(false);
+  const { isSaving, save } = useStagingSave(label);
   const { answer } = problem;
 
   const form = useForm<StagingSubjectiveFormValues>({
@@ -66,57 +64,15 @@ export function StagingSubjectiveForm({
 
   const onSubmit = form.handleSubmit(
     async (values) => {
-      const tasks: Array<{ run: () => Promise<unknown>; commit: () => void }> = [];
-
-      const problemBody: { instruction?: string; content?: string } = {};
-      if (dirtyFields.instruction) problemBody.instruction = values.instruction;
-      if (dirtyFields.content) problemBody.content = values.content;
-      if (Object.keys(problemBody).length > 0) {
-        tasks.push({
-          run: () => updateStagingProblem(problem.problemId, problemBody),
-          commit: () => {
-            if (problemBody.instruction !== undefined)
-              form.resetField('instruction', { defaultValue: values.instruction });
-            if (problemBody.content !== undefined)
-              form.resetField('content', { defaultValue: values.content });
-          },
-        });
-      }
-      const answerBody: { content?: string; explanation?: string } = {};
-      if (dirtyFields.answerContent) answerBody.content = values.answerContent;
-      if (dirtyFields.answerExplanation) answerBody.explanation = values.answerExplanation;
-      if (Object.keys(answerBody).length > 0) {
-        tasks.push({
-          run: () => updateStagingAnswer(answer.answerId, answerBody),
-          commit: () => {
-            if (answerBody.content !== undefined)
-              form.resetField('answerContent', { defaultValue: values.answerContent });
-            if (answerBody.explanation !== undefined)
-              form.resetField('answerExplanation', { defaultValue: values.answerExplanation });
-          },
-        });
-      }
-      if (tasks.length === 0) return;
-
-      setIsSaving(true);
-      const results = await Promise.allSettled(tasks.map((task) => task.run()));
-      setIsSaving(false);
-
-      results.forEach((result, index) => {
-        if (result.status === 'fulfilled') tasks[index]?.commit();
-      });
-      const failed = results.filter((result) => result.status === 'rejected').length;
-      if (failed < results.length) {
-        void queryClient.invalidateQueries({ queryKey: stagingKeys.detail(label) });
-      }
-
-      if (failed === 0) {
-        toast.success('저장했어요.');
-      } else if (failed < results.length) {
-        toast.error(`일부 항목만 저장했어요. (${results.length - failed}/${results.length} 성공)`);
-      } else {
-        toast.error('저장하지 못했어요. 다시 시도해 주세요.');
-      }
+      await save(
+        buildSubjectiveSaveTasks({
+          problemId: problem.problemId,
+          answerId: answer.answerId,
+          values,
+          dirtyFields,
+          resetField: form.resetField,
+        }),
+      );
     },
     () => toast.error('필수 항목을 확인해 주세요.'),
   );
