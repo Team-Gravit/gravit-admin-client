@@ -161,8 +161,9 @@
 - **강제 로그아웃은 재발급 자체가 실패할 때만.** 재발급은 성공했는데 재시도도 401 이면 로그아웃 없이 오류로 표시한다(QA_SPEC 결정 #12, 사용자 결정 2026-10-17).
 
 ### D9-4 네트워크 경로 (QA_SPEC A-0, G1 해소)
-- **QA 도메인 = `https://grav-it-qa.inuappcenter.kr`**(서버 Caddy 리버스 프록시, HTTPS, 경로 접두 `/api/v1`). dev 배포 응답 확인(2026-10-26): `/actuator/health` UP, 토큰 없는 `/api/v1/sprints` 401 `AUTH_4011`, 관리자 토큰 200 `[]`.
-- 운영: `vercel.json` rewrite `/qa-api/:path*` → `https://grav-it-qa.inuappcenter.kr/api/v1/:path*`, **SPA catch-all 보다 앞**(D8-4 와 같은 규칙). 로컬: vite `server.proxy` 의 `/qa-api` → `VITE_QA_ORIGIN`(기본 QA 도메인, 로컬 QA 서버면 `http://localhost:8080`) + `/api/v1`, `changeOrigin`. 둘 다 `fix:QA_API_WIRING` 에서 추가했다. `VITE_QA_ORIGIN` 은 `VITE_RAVVIT_ORIGIN` 처럼 vite 설정에서만 읽으므로 `src/env.ts` 에 넣지 않는다.
+- **QA 도메인 = `https://grav-it-admin.inuappcenter.kr`**(서버 Caddy 리버스 프록시, HTTPS, 경로 접두 `/api/v1`). dev 배포 응답 확인(2026-10-26): `/actuator/health` UP, 토큰 없는 `/api/v1/sprints` 401 `AUTH_4011`, 관리자 토큰 200 `[]`.
+- 운영: `vercel.json` rewrite `/qa-api/:path*` → `https://grav-it-admin.inuappcenter.kr/api/v1/:path*`, **SPA catch-all 보다 앞**(D8-4 와 같은 규칙). 로컬: vite `server.proxy` 의 `/qa-api` → `VITE_QA_ORIGIN`(기본 QA 도메인, 로컬 QA 서버면 `http://localhost:8080`) + `/api/v1`, `changeOrigin`. 둘 다 `fix:QA_API_WIRING` 에서 추가했다. `VITE_QA_ORIGIN` 은 `VITE_RAVVIT_ORIGIN` 처럼 vite 설정에서만 읽으므로 `src/env.ts` 에 넣지 않는다.
+- 도메인 교체(2026-11-19): QA 서버가 관리자 서버(gravit-admin-server)로 이름을 바꿔 도메인을 교체했고, 옛 QA 도메인은 서버 Caddy 에서 제거됐다. 경로 접두·QA API 계약·인증(D9-3)은 그대로다. 위 2026-10-26 확인은 옛 도메인 기준이고, 새 도메인은 2026-11-19 `/actuator/health` UP·토큰 없는 `/api/v1/sprints` 401 을 확인했다.
 - **MSW 는 그대로 둔다**(`VITE_USE_MOCK=true`, 결정 #6). QA API 13개 모두 핸들러가 있고 서비스 워커가 `/qa-api/*` 를 먼저 가로채므로, 목 모드 동작은 proxy 추가 전과 같다. 목을 끄면 로컬도 실서버로 간다.
 - 도메인 확정 전 메뉴 노출(QA_SPEC 결정 #11) 때문에 운영에서 `/qa-api` 가 index.html 로 떨어지던 문제는 rewrite 로 해소된다. 배포 후 실서버 확인(Bearer 헤더 전달·목록 200·등록 201/409)은 `manual_review` `integration` 으로 남긴다.
 
