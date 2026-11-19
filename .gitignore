@@ -42,3 +42,4 @@ playwright-report
 .env.development
 /RAVVIT_SPEC.md
 /QA_SPEC.md
+/docs/
